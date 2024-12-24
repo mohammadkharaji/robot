@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Launch Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">🚀 Crypto Launch Dashboard</h1>
+        <canvas id="cryptoChart" class="mt-4"></canvas>
+        <div class="text-center mt-4">
+            <button id="reloadData" class="btn btn-primary">Reload Data</button>
+        </div>
+    </div>
+
+    <script>
+        async function fetchData() {
+            const response = await fetch('/api/launch_candidates');
+            return response.json();
+        }
+
+        function renderChart(data) {
+            const ctx = document.getElementById('cryptoChart').getContext('2d');
+            const labels = data.map(item => item.name);
+            const volumes = data.map(item => item.volume);
+            const prices = data.map(item => item.price);
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Volume (USD)',
+                            data: volumes,
+                            backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                        },
+                        {
+                            label: 'Price (USD)',
+                            data: prices,
+                            type: 'line',
+                            borderColor: 'rgba(255, 99, 132, 1)',
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Cryptocurrencies' } },
+                        y: { title: { display: true, text: 'Values' } }
+                    }
+                }
+            });
+        }
+
+        document.getElementById('reloadData').addEventListener('click', async () => {
+            const data = await fetchData();
+            renderChart(data);
+        });
+
+        // Load data on page load
+        fetchData().then(renderChart);
+    </script>
+</body>
+</html>
